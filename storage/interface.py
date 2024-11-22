@@ -51,17 +51,6 @@ class BookStorage(ABC):
         pass
 
     @abstractmethod
-    def update_status(self, book_id: str, new_status: str) -> None:
-        """
-        Updates the status of a Book.
-
-        :param book_id: Identifier of the Book
-                        whose status needs to be updated.
-        :param new_status: New status of the book.
-        """
-        pass
-
-    @abstractmethod
     def all(self) -> List[Book]:
         """
         Retrieves all books from the storage.
