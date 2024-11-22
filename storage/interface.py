@@ -1,9 +1,10 @@
+from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from models.book import Book
 
 
-class BookStorage:
+class BookStorage(ABC):
     """
     Storage interface for managing books.
 
@@ -11,6 +12,7 @@ class BookStorage:
     such as adding, deleting, searching, updating status and getting all books.
     """
 
+    @abstractmethod
     def save(self, book: Book) -> None:
         """
         Saves the book to storage.
@@ -19,6 +21,7 @@ class BookStorage:
         """
         pass
 
+    @abstractmethod
     def get(self, book_id: str) -> Optional[Book]:
         """
         Retrieves a Book by ID.
@@ -28,6 +31,7 @@ class BookStorage:
         """
         pass
 
+    @abstractmethod
     def delete(self, book: Book) -> None:
         """
         Removes a Book from storage.
@@ -36,6 +40,7 @@ class BookStorage:
         """
         pass
 
+    @abstractmethod
     def find(self, query: Optional[str]) -> List[Book]:
         """
         Searches for books based on a given query.
@@ -45,6 +50,7 @@ class BookStorage:
         """
         pass
 
+    @abstractmethod
     def update_status(self, book_id: str, new_status: str) -> None:
         """
         Updates the status of a Book.
@@ -55,6 +61,7 @@ class BookStorage:
         """
         pass
 
+    @abstractmethod
     def all(self) -> List[Book]:
         """
         Retrieves all books from the storage.
