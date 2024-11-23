@@ -4,18 +4,20 @@ from typing import List, Optional
 from models.book import Book
 
 
-class BookStorage(ABC):
+class StorageManager(ABC):
     """
-    Storage interface for managing books.
+    Interface for managing storage of books.
 
-    This class describes the basic operations with books in the repository,
-    such as adding, deleting, searching, updating status and getting all books.
+    This interface provides the basic CRUD-operations
+    for working with books in a storage.
+    The implementation of these operations will vary based
+    on the underlying data storage mechanism (e.g., file system, database, etc.).
     """
 
     @abstractmethod
     def save(self, book: Book) -> None:
         """
-        Saves the book to storage.
+        Saves the book to the storage.
 
         :param book: The Book object to save.
         """
@@ -56,5 +58,24 @@ class BookStorage(ABC):
         Retrieves all books from the storage.
 
         :return: List of all books.
+        """
+        pass
+
+    @abstractmethod
+    def _load_objs(self) -> List[Book]:
+        """
+        Loads book objects from the storage.
+
+        This method should be implemented by concrete classes
+        to load data from the underlying source.
+        """
+        pass
+
+    def _save_objs(self) -> None:
+        """
+        Saves book objects to the storage.
+
+        This method should be implemented by concrete classes
+        to save data to the underlying source.
         """
         pass
