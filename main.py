@@ -1,7 +1,8 @@
 from cli.decorators import manage_history
 from cli.parser import CLIParser
 from manager.manage import BookManager
-from storage.json_storage import JsonStorage
+from storage.json.manager import BookStorageManager
+from storage.json.source import JsonSource
 
 
 @manage_history()
@@ -17,10 +18,13 @@ def main():
     """
 
     # Initializing the book storage with a data file
-    book_storage = JsonStorage(file_path="data/books.json")
+    source = JsonSource(file_path="data/books.json")
+
+    # Initializing the storage manager with a data source
+    storage_manager = BookStorageManager(source)
 
     # Initializing a manager to work with books
-    book_manager = BookManager(book_storage)
+    book_manager = BookManager(storage_manager)
 
     # Initializing the CLI parser to process commands
     cli = CLIParser(book_manager)
