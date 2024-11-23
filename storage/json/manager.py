@@ -1,33 +1,48 @@
-import json
-import os
-from typing import Dict, List, Optional, Generator, Any
+from typing import Dict, List, Optional
 
 from models.book import Book
-from storage.exceptions import InvalidJsonFormatException
-from storage.interface import BookStorage
-from storage.observer import ObservableList
+from storage.base.manager import StorageManager
+from storage.base.observer import ObservableList
+from storage.base.source import DataSource
 
 
-class JsonStorage(BookStorage):
+class BookStorageManager(StorageManager):
     """
-    A class for working with JSON storage of data about books.
+    A class for working with storage of data about books.
 
-    Implements the `BookStorage` interface
-    and uses generators to work with data.
+    Implements the `StorageManager` interface
+    and provides functionality to manage books,
+    including CRUD operations over the books.
+    This implementation uses generators to load and save book data.
     """
 
-    def __init__(self, file_path: str):
+    def __init__(self, data_source: DataSource):
         """
-        Initializing the storage.
+        Initializes the book storage.
 
-        :param file_path: Path to the JSON file where the data is stored.
+        :param data_source: The data source used to load and save books.
         """
-        self.file_path = file_path
-        self._ensure_file_exists()
+        self.data_source = data_source
         self.__books = ObservableList(
-            list(self._load_books()), on_change=self._on_change
+            list(self._load_objs()), on_change=self._on_change
         )
         self.__index = self._create_index(self.__books)
+
+    def _load_objs(self) -> List[Book]:
+        """
+        Loads books from the data source.
+
+        :return: A list of Book objects loaded from the data source.
+        """
+        return [Book.from_json(data) for data in self.data_source.load()]
+
+    def _save_objs(self) -> None:
+        """
+        Saves the books to the data source.
+
+        :return: None
+        """
+        self.data_source.save([book.to_json() for book in self.__books])
 
     def save(self, book: Book) -> None:
         """
@@ -95,46 +110,6 @@ class JsonStorage(BookStorage):
         """
         return self.__books
 
-    def _load_books(self) -> Generator[Book, Any, None]:
-        """
-        Load books from a JSON file as a generator.
-
-        :return: Book object generator.
-        :raises InvalidJsonFormatException: If the JSON file format is incorrect.
-        """
-        try:
-            with open(self.file_path, "r", encoding="utf-8") as file:
-                data = json.load(file)
-                for book_data in data:
-                    yield Book.from_json(book_data)
-        except json.JSONDecodeError as e:
-            raise InvalidJsonFormatException(f"Failed to parse JSON file: {e}")
-
-    def _save_books(self) -> None:
-        """
-        Save changes to a JSON file.
-
-        :return: None
-        """
-        with open(self.file_path, "w", encoding="utf-8") as file:
-            json.dump(
-                [book.to_json() for book in self.__books],
-                file,
-                ensure_ascii=False,
-                indent=4
-            )
-
-    def _ensure_file_exists(self) -> None:
-        """
-        Verify that the JSON file exists.
-
-        If the file does not exist, an empty file is created.
-        """
-        os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
-        if not os.path.exists(self.file_path):
-            with open(self.file_path, "w", encoding="utf-8") as file:
-                json.dump([], file)
-
     def _create_index(self, books: List[Book]) -> Dict[str, Dict[str, set]]:
         """
         Create an index to quickly search books by field.
@@ -176,4 +151,4 @@ class JsonStorage(BookStorage):
         :return: None
         """
         self.__index = self._create_index(self.__books)
-        self._save_books()
+        self._save_objs()
