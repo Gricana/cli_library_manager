@@ -5,7 +5,8 @@ from manager.manage import BookManager
 from models.book import Book
 from models.constants import BookStatus
 from models.exceptions import BookNotFoundException, ValidationException
-from storage.json_storage import JsonStorage
+from storage.json.manager import BookStorageManager
+from storage.json.source import JsonSource
 
 
 class TestBookManager(unittest.TestCase):
@@ -19,8 +20,9 @@ class TestBookManager(unittest.TestCase):
         self.test_file_path = "data/test_books.json"
 
         # Create temporary storage for tests
-        self.storage = JsonStorage(file_path=self.test_file_path)
-        self.book_manager = BookManager(book_storage=self.storage)
+        self.source = JsonSource(self.test_file_path)
+        self.storage = BookStorageManager(self.source)
+        self.book_manager = BookManager(self.storage)
 
     def tearDown(self):
         """
@@ -67,9 +69,9 @@ class TestBookManager(unittest.TestCase):
         """
         book = Book(title="Test Book", author="Author", year=2024)
         self.book_manager.add_book(book)
-        self.book_manager.update_status(book.id, BookStatus.ISSUED)
+        self.book_manager.update_status(book.id, BookStatus.ISSUED.value)
         updated_book = self.book_manager.all()[0]
-        self.assertEqual(updated_book.status, BookStatus.ISSUED)
+        self.assertEqual(updated_book.status, BookStatus.ISSUED.value)
 
     def test_update_status_book_not_found(self):
         """
@@ -79,7 +81,7 @@ class TestBookManager(unittest.TestCase):
         with self.assertRaises(BookNotFoundException):
             self.book_manager.update_status(
                 "eb55d06a-23e7-451c-998c-598e366cf82b",  # Non-existent ID
-                BookStatus.ISSUED)
+                BookStatus.ISSUED.value)
 
     def test_remove_book_not_found(self):
         """

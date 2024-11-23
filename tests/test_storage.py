@@ -2,11 +2,12 @@ import os
 import unittest
 
 from models.book import Book
-from storage.exceptions import InvalidJsonFormatException
-from storage.json_storage import JsonStorage
+from storage.json.exceptions import InvalidJsonFormatException
+from storage.json.manager import BookStorageManager
+from storage.json.source import JsonSource
 
 
-class TestJsonStorage(unittest.TestCase):
+class TestStorageManager(unittest.TestCase):
 
     def setUp(self):
         """
@@ -14,7 +15,8 @@ class TestJsonStorage(unittest.TestCase):
         We create a test storage with a temporary file.
         """
         self.test_file_path = "data/test_books.json"
-        self.storage = JsonStorage(file_path=self.test_file_path)
+        self.source = JsonSource(file_path=self.test_file_path)
+        self.storage = BookStorageManager(self.source)
 
     def tearDown(self):
         """
@@ -26,7 +28,7 @@ class TestJsonStorage(unittest.TestCase):
 
     def test_create_storage(self):
         """
-        Verifies that when a JsonStorage object is created, a file is created.
+        Verifies that when a JsonSource object is created, a file is created.
         """
         self.assertTrue(os.path.exists(self.test_file_path))
 
@@ -63,7 +65,7 @@ class TestJsonStorage(unittest.TestCase):
 
     def test_get_book_by_non_existing_id(self):
         """
-        Checks that the get_book_by_id method throws an exception
+        Checks that the get method throws an exception
         when trying to find a book with a non-existent ID.
         """
 
@@ -79,18 +81,20 @@ class TestJsonStorage(unittest.TestCase):
         self.storage.save(book)
 
         # Checking that the book has been added
-        storage_after_save = JsonStorage(file_path=self.test_file_path)
+        storage_after_save = BookStorageManager(self.source)
         books_after_save = storage_after_save.all()
+
         self.assertEqual(len(books_after_save), 1)
         self.assertEqual(books_after_save[0].title, "Test Book")
 
         # Deleting a book
         self.storage.delete(book)
 
-        # Create a new JsonStorage object
+        # Create a new JsonSource object
         # and check that the book has been deleted
-        storage_after_delete = JsonStorage(file_path=self.test_file_path)
+        storage_after_delete = BookStorageManager(self.source)
         books_after_delete = storage_after_delete.all()
+
         self.assertEqual(len(books_after_delete), 0)
 
     def test_update_book(self):
@@ -128,7 +132,7 @@ class TestJsonStorage(unittest.TestCase):
             f.write('{"title": 123')  # Invalid JSON format
 
         with self.assertRaises(InvalidJsonFormatException):
-            JsonStorage(self.test_file_path)
+            BookStorageManager(self.source)
 
     def test_overwrite_file(self):
         """
@@ -138,8 +142,8 @@ class TestJsonStorage(unittest.TestCase):
         book1 = Book(title="Test Book 1", author="Author 1", year=2024)
         self.storage.save(book1)
 
-        # Create a new JsonStorage object and check the contents of the file
-        storage_after_first_save = JsonStorage(file_path=self.test_file_path)
+        # Create a new JsonSource object and check the contents of the file
+        storage_after_first_save = BookStorageManager(self.source)
         books_after_first_save = storage_after_first_save.all()
         self.assertEqual(len(books_after_first_save), 1)
         self.assertEqual(books_after_first_save[0].title, "Test Book 1")
@@ -148,9 +152,9 @@ class TestJsonStorage(unittest.TestCase):
         book2 = Book(title="Test Book 2", author="Author 2", year=2024)
         self.storage.save(book2)
 
-        # Create a new JsonStorage object
+        # Create a new JsonSource object
         # and check that the file is overwritten correctly
-        storage_after_second_save = JsonStorage(file_path=self.test_file_path)
+        storage_after_second_save = BookStorageManager(self.source)
         books_after_second_save = storage_after_second_save.all()
         self.assertEqual(len(books_after_second_save), 2)
         self.assertEqual(books_after_second_save[0].title, "Test Book 1")

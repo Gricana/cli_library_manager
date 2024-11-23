@@ -7,14 +7,16 @@ from cli.parser import CLIParser
 from manager.manage import BookManager
 from models.book import Book
 from models.constants import BookStatus
-from storage.json_storage import JsonStorage
+from storage.json.manager import BookStorageManager
+from storage.json.source import JsonSource
 
 
 class TestCLIParser(unittest.TestCase):
     def setUp(self):
         self.test_file_path = 'data/books.json'
-        self.book_store = JsonStorage(self.test_file_path)
-        self.book_manager = BookManager(self.book_store)
+        self.book_source = JsonSource(self.test_file_path)
+        self.book_storage = BookStorageManager(self.book_source)
+        self.book_manager = BookManager(self.book_storage)
         self.cli_parser = CLIParser(self.book_manager)
 
     def tearDown(self):
