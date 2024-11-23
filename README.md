@@ -155,39 +155,44 @@ python -m unittest discover -s tests
 ```markdown
 .
 ├── cli
-│ ├── commands.py
-│ ├── decorators.py
-│ ├── __init__.py
-│ └── parser.py
+│   ├── commands.py
+│   ├── decorators.py
+│   ├── __init__.py
+│   └── parser.py
 ├── data
-│ └── books.json
 ├── main.py
 ├── manager
-│ ├── __init__.py
-│ └── manage.py
+│   ├── __init__.py
+│   └── manage.py
 ├── models
-│ ├── book.py
-│ ├── constants.py
-│ ├── exceptions.py
-│ ├── utils.py
-│ └── validators
-│ ├── base.py
-│ ├── book.py
-│ └── __init__.py
+│   ├── book.py
+│   ├── constants.py
+│   ├── exceptions.py
+│   ├── utils.py
+│   └── validators
+│       ├── base.py
+│       ├── book.py
+│       └── __init__.py
 ├── README.md
 ├── storage
-│ ├── exceptions.py
-│ ├── __init__.py
-│ ├── interface.py
-│ ├── json_storage.py
-│ └── observer.py
+│   ├── base
+│   │   ├── __init__.py
+│   │   ├── manager.py
+│   │   ├── observer.py
+│   │   └── source.py
+│   ├── __init__.py
+│   └── json
+│       ├── exceptions.py
+│       ├── __init__.py
+│       ├── manager.py
+│       └── source.py
 └── tests
-├── data
-├── __init__.py
-├── test_cli.py
-├── test_manager.py
-├── test_storage.py
-└── test_validators.py
+    ├── data
+    ├── __init__.py
+    ├── test_cli.py
+    ├── test_manager.py
+    ├── test_storage.py
+    └── test_validators.py
 ```
 
 ### Основные модули
@@ -232,13 +237,17 @@ CLI-интерфейс.
 
 6. **storage**
 
-Модуль для работы с хранилищем данных.
+Модуль для работы с хранилищем данных, реализующий абстракции для различных типов хранения.
 
-* _exceptions.py:_ Исключения, связанные с ошибками хранения данных.
-* _interface.py:_ Интерфейс для реализации различных хранилищ.
-* _json_storage.py:_ Реализация хранилища данных в формате JSON.
-* _observer.py:_ Реализует паттерн "наблюдатель" для синхронизации изменений
-  данных.
+* _**base**_: Базовые интерфейсы для хранения данных.
+  * _manager.py:_ Определяет абстракции для управления хранилищем данных.
+  * observer.py: Реализует паттерн "наблюдатель" для синхронизации изменений в 
+    данных.
+  * source.py: Абстракции для источников данных.
+* **_json:_** Реализация хранилища данных в формате JSON.
+  * _exceptions.py:_ Исключения, связанные с ошибками при работе с JSON-файлом.
+  * _manager.py:_ Реализация менеджера хранения данных для JSON.
+  * _source.py:_ Реализация источника данных для работы с JSON-файлом.
 
 7. **tests**
 
@@ -255,8 +264,8 @@ CLI-интерфейс.
   Принимает команды, парсит их и вызывает соответствующие методы в manager.
 * _Manager:_ Осуществляет управление данными, выполняя операции над объектами
   Book и взаимодействуя с модулем storage.
-* _Storage:_ Обеспечивает сохранение и загрузку данных (например, из файла
-  JSON).
+* _Storage:_  Обеспечивает сохранение и загрузку данных. 
+Реализует различные механизмы хранения, включая работу с JSON.
 * _Models:_ Содержит модель книги и обеспечивает проверку данных через
   валидаторы.
 * _Tests:_ Обеспечивает тестирование каждого модуля, чтобы гарантировать
